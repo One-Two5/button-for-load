@@ -8,7 +8,6 @@ public class ImportResultDto {
         this.message = message;
     }
 
-    public ImportResultDto() {}
 
     public String getMessage() {
         return message;
