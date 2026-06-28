@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class FileImportService {
@@ -24,7 +25,8 @@ public class FileImportService {
 
         String version = "unknown";
         String extension = "xlsx";
-        String fileName = LocalDateTime.now() + "_" + version + "." + extension;
+        String fileName = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + "_" + version + "." + extension;
 
         Path savedPath = fileStorageService.save(content, fileName);
         return new ImportResultDto("Файл сохранен: " + savedPath);
