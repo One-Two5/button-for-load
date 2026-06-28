@@ -1,10 +1,10 @@
 package org.example.buttonforload.service;
 
 import org.example.buttonforload.dto.ImportResultDto;
-import org.example.buttonforload.util.FileNameGenerator;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 @Service
 public class FileImportService {
@@ -24,7 +24,7 @@ public class FileImportService {
 
         String version = "unknown";
         String extension = "xlsx";
-        String fileName = FileNameGenerator.generateFileName(version, extension);
+        String fileName = LocalDateTime.now() + "_" + version + "." + extension;
 
         Path savedPath = fileStorageService.save(content, fileName);
         return new ImportResultDto("Файл сохранен: " + savedPath);
