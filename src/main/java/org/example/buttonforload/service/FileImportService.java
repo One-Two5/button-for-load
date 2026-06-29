@@ -20,7 +20,7 @@ public class FileImportService {
     }
 
     public ImportResultDto importFile() {
-        String sourceUrl = "https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv";
+        String sourceUrl = "https://reestrs.minjust.gov.ru/rest/registry/39b95df9-9a68-6b6d-e1e3-e6388507067e/export?";
         byte[] content = fileDownloadService.download(sourceUrl);
 
         String version = "unknown";
