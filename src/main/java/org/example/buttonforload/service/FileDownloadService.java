@@ -6,13 +6,13 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FileDownloadService {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate unsafeRestTemplate;
 
-    public FileDownloadService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public FileDownloadService(RestTemplate unsafeRestTemplate) {
+        this.unsafeRestTemplate = unsafeRestTemplate;
     }
 
     public byte[] download(String url) {
-        return  restTemplate.getForObject(url, byte[].class);
+        return unsafeRestTemplate.getForObject(url, byte[].class);
     }
 }
