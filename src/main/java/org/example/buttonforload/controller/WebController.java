@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-public class HomeController {
+public class WebController {
 
     private final FileImportService fileImportService;
 
-    public HomeController(FileImportService fileImportService) {
+    public WebController(FileImportService fileImportService) {
         this.fileImportService = fileImportService;
     }
 
