@@ -10,6 +10,9 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class FileImportService {
 
+    @Value("${app.external-service.url}")
+    String sourceUrl;
+
     private final FileStorageService fileStorageService;
     private final FileDownloadService fileDownloadService;
 
