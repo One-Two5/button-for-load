@@ -1,11 +1,14 @@
 package org.example.buttonforload.service;
 
 import org.example.buttonforload.dto.ImportResultDto;
+import org.example.buttonforload.dto.ResourceRowDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 public class FileImportService {
@@ -15,15 +18,18 @@ public class FileImportService {
 
     private final FileStorageService fileStorageService;
     private final FileDownloadService fileDownloadService;
+    private final XlsxParseService xlsxParseService;
 
     public FileImportService(FileStorageService fileStorageService,
-                             FileDownloadService fileDownloadService) {
+                             FileDownloadService fileDownloadService, XlsxParseService xlsxParseService) {
         this.fileStorageService = fileStorageService;
         this.fileDownloadService = fileDownloadService;
+        this.xlsxParseService = xlsxParseService;
     }
 
     public ImportResultDto importFile() {
-        String sourceUrl = "https://reestrs.minjust.gov.ru/rest/registry/39b95df9-9a68-6b6d-e1e3-e6388507067e/export?";
+
+
         byte[] content = fileDownloadService.download(sourceUrl);
 
         String version = "unknown";
@@ -32,6 +38,8 @@ public class FileImportService {
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + "_" + version + "." + extension;
 
         Path savedPath = fileStorageService.save(content, fileName);
-        return new ImportResultDto("Файл сохранен: " + savedPath);
+        List<ResourceRowDto> rows = xlsxParseService.parse(savedPath);
+
+        return new ImportResultDto("Файл сохранен: " + savedPath + ", строк: " + rows.size());
     }
 }
