@@ -1,5 +1,6 @@
 package org.example.buttonforload.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.example.buttonforload.dto.ResourceRowDto;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class XlsxParseService {
 
@@ -26,14 +28,14 @@ public class XlsxParseService {
              Workbook workbook = WorkbookFactory.create(inputStream)) {
 
             int sheetCount = workbook.getNumberOfSheets();
-            System.out.println("Workbook sheets count = " + sheetCount);
+              log.info("Workbook sheets count = {}", sheetCount);
 
             if (sheetCount == 0) {
                 throw new IllegalStateException("В книге нет листов: " + filePath);
             }
 
             for (int target = 0; target < sheetCount; target++) {
-                System.out.println("Sheet " + target + " = " + workbook.getSheetName(target));
+                log.info("Sheet {} = {}", target, workbook.getSheetName(target));
             }
 
             Sheet sheet = workbook.getSheetAt(START_ROW_INDEX);
@@ -100,7 +102,7 @@ public class XlsxParseService {
         try {
             return Integer.parseInt(value.replaceAll("\\s+", ""));
         } catch (NumberFormatException e) {
-            System.out.println("Skip number parse, value='" + value + "'");
+            log.warn("Skip number parse, value='{}'", value);
             return null;
         }
     }
@@ -124,7 +126,7 @@ public class XlsxParseService {
         try {
             return LocalDate.parse(cellValue, DATE_FORMATTER);
         } catch (Exception e) {
-            System.out.println("Skip date parse, value='" + value + "'");
+            log.warn("Skip date parse, value='{}'", value);
             return null;
         }
     }
