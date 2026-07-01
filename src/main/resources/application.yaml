@@ -17,3 +17,7 @@ app:
 
     external-service:
       url: "https://reestrs.minjust.gov.ru/rest/registry/39b95df9-9a68-6b6d-e1e3-e6388507067e/export?"
+
+    file:
+      version: "unknown"
+      extension: "xlsx"

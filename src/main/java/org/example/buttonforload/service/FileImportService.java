@@ -13,6 +13,12 @@ import java.util.List;
 @Service
 public class FileImportService {
 
+    @Value("${app.file.version}")
+    private String version;
+
+    @Value("${app.file.extension}")
+    private String extension;
+
     @Value("${app.external-service.url}")
     String sourceUrl;
 
@@ -32,8 +38,6 @@ public class FileImportService {
 
         byte[] content = fileDownloadService.download(sourceUrl);
 
-        String version = "unknown";
-        String extension = "xlsx";
         String fileName = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + "_" + version + "." + extension;
 
