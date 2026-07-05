@@ -18,9 +18,13 @@ import java.util.List;
 public class XlsxParseService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final int START_ROW_INDEX = 0;
+    private static final int START_SHEET_INDEX = 0;
 
     public List<ResourceRowDto> parse(Path filePath) {
+
+        log.info("Начало парсинга xlsx файла: {}", filePath);
+        long startTime = System.currentTimeMillis();
+
         List<ResourceRowDto> rows = new ArrayList<>();
         DataFormatter formatter = new DataFormatter();
 
@@ -28,17 +32,12 @@ public class XlsxParseService {
              Workbook workbook = WorkbookFactory.create(inputStream)) {
 
             int sheetCount = workbook.getNumberOfSheets();
-              log.info("Workbook sheets count = {}", sheetCount);
 
             if (sheetCount == 0) {
-                throw new IllegalStateException("В книге нет листов: " + filePath);
+                throw new IllegalStateException("В книге нет листов: %s".formatted(filePath));
             }
 
-            for (int target = 0; target < sheetCount; target++) {
-                log.info("Sheet {} = {}", target, workbook.getSheetName(target));
-            }
-
-            Sheet sheet = workbook.getSheetAt(START_ROW_INDEX);
+            Sheet sheet = workbook.getSheetAt(START_SHEET_INDEX);
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -47,6 +46,12 @@ public class XlsxParseService {
                 }
 
                 String numberStr = cellValue(formatter, row.getCell(0));
+
+                Integer parsedNumber = parseIntegerSafe(numberStr);
+                if (parsedNumber == null) {
+                    continue;
+                }
+
                 String fullName = cellValue(formatter, row.getCell(1));
                 String inclusionGrounds = cellValue(formatter, row.getCell(2));
                 String inclusionDateStr = cellValue(formatter, row.getCell(3));
@@ -66,9 +71,13 @@ public class XlsxParseService {
                 rows.add(dto);
             }
 
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Успешно распарсен файл {}. Успешно прочитано строк: {}. Время выполнения: {} мс",
+                    filePath.getFileName(), rows.size(), duration);
+
             return rows;
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось прочитать XLSX файл: " + filePath, e);
+            throw new RuntimeException("Не удалось прочитать XLSX файл: %s".formatted(filePath), e);
         }
     }
 
@@ -102,7 +111,7 @@ public class XlsxParseService {
         try {
             return Integer.parseInt(value.replaceAll("\\s+", ""));
         } catch (NumberFormatException e) {
-            log.warn("Skip number parse, value='{}'", value);
+            log.warn("Строка {}: Не удалось распарсить число из значения '{}'", value, value);
             return null;
         }
     }
@@ -126,7 +135,7 @@ public class XlsxParseService {
         try {
             return LocalDate.parse(cellValue, DATE_FORMATTER);
         } catch (Exception e) {
-            log.warn("Skip date parse, value='{}'", value);
+            log.warn("Строка {}: Ошибка парсинга даты, значение='{}'", value, value, e);
             return null;
         }
     }

@@ -1,11 +1,11 @@
 spring:
-  port: 8080
+  port: ${SPRING_PORT}
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/button_db
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_NAME}
+    password: ${DB_PASS}
+    driver-class-name: ${DB_DRIVER}
 
   liquibase:
     enabled: true
@@ -16,8 +16,5 @@ app:
       storage-dir: files/bucket
 
     external-service:
-      url: "https://reestrs.minjust.gov.ru/rest/registry/39b95df9-9a68-6b6d-e1e3-e6388507067e/export?"
+      url: ${APP_EXTERNAL_SERVICE}
 
-    file:
-      version: "unknown"
-      extension: "xlsx"
