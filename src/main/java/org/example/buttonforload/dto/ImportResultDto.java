@@ -1,20 +1,12 @@
 package org.example.buttonforload.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public class ImportResultDto {
 
     private String message;
-
-    public ImportResultDto(String message) {
-        this.message = message;
-    }
-
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 
 }

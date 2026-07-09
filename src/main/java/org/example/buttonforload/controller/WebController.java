@@ -1,5 +1,6 @@
 package org.example.buttonforload.controller;
 
+import lombok.AllArgsConstructor;
 import org.example.buttonforload.dto.ImportResultDto;
 import org.example.buttonforload.service.FileImportService;
 import org.springframework.stereotype.Controller;
@@ -8,13 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
+@AllArgsConstructor
 public class WebController {
 
     private final FileImportService fileImportService;
-
-    public WebController(FileImportService fileImportService) {
-        this.fileImportService = fileImportService;
-    }
 
     @GetMapping("/")
     public String index(Model model) {

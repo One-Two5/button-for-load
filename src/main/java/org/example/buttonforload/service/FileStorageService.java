@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 @Service
 public class FileStorageService {
 
-    @Value("${app.files.storage-dir:files}")
+    @Value("${app.files.storage-dir:./storage}")
     private String storageDir;
 
     public Path save(byte[] content, String fileName) {
@@ -23,7 +23,7 @@ public class FileStorageService {
             Files.write(filePath, content);
 
             if (!Files.exists(filePath)) {
-                throw new IllegalStateException("Файл не был создан: " + filePath);
+                throw new IllegalStateException("Файл не был создан: %s".formatted(filePath));
             }
 
             return filePath;
