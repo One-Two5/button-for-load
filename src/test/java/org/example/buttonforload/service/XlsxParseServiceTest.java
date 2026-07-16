@@ -1,15 +1,12 @@
 package org.example.buttonforload.service;
 
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.buttonforload.dto.ResourceRowDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class XlsxParseServiceTest {
 
-    private XlsxParseService xlsxParseService;
+    private static XlsxParseService xlsxParseService;
 
     @BeforeEach
     void setUp() {
@@ -25,114 +22,118 @@ class XlsxParseServiceTest {
     }
 
     @Test
-    void parse_ValidXlsx_ReturnsMappedDtoList(@TempDir Path tempDir) throws IOException {
-        Path filePath = tempDir.resolve("valid_data.xlsx");
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Sheet1");
-
-            sheet.createRow(0);
-
-            Row headerRow = sheet.createRow(1);
-            headerRow.createCell(0).setCellValue("№ п/п");
-            headerRow.createCell(1).setCellValue("Полное наименование");
-            headerRow.createCell(2).setCellValue("Основания");
-            headerRow.createCell(3).setCellValue("Дата включения");
-            headerRow.createCell(4).setCellValue("Дата исключения");
-
-            Row firstRow = sheet.createRow(2);
-            firstRow.createCell(0).setCellValue(1);
-            firstRow.createCell(1).setCellValue("«Евразийская антимонопольная ассоциация»");
-            firstRow.createCell(2).setCellValue("Статья 32 ФЗ");
-            firstRow.createCell(3).setCellValue("27.06.2013");
-            firstRow.createCell(4).setCellValue("05.07.2023");
-
-            Row secondRow = sheet.createRow(3);
-            secondRow.createCell(0).setCellValue(2);
-            secondRow.createCell(1).setCellValue("Ассоциация ГОЛОС");
-            secondRow.createCell(2).setCellValue("Статья 32 ФЗ");
-            secondRow.createCell(3).setCellValue("05.06.2014");
-            secondRow.createCell(4).setCellValue("");
-
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                workbook.write(fos);
-            }
-        }
-
+    void shouldParseAllValidRowsFromXlsxFile() {
+        Path filePath = Paths.get("src", "test", "resources", "tables", "parse_all_valid_rows.xlsx");
         List<ResourceRowDto> result = xlsxParseService.parse(filePath);
+
+        assertEquals(2, result.size(), "Количество распарсенных строк не совпадает с ожидаемым");
+
+        for (int i = 0; i < result.size(); i++) {
+            ResourceRowDto row = result.get(i);
+            int index = i;
+
+            assertAll("Проверка полей для строки индекса " + index,
+                    () -> assertNotNull(row.getNumber(), "Поле 'number' пустое в строке " + index),
+                    () -> assertNotNull(row.getFullName(), "Поле 'fullName' пустое в строке " + index),
+                    () -> assertNotNull(row.getInclusionGrounds(),
+                            "Поле 'inclusionGrounds' пустое в строке " + index),
+                    () -> assertNotNull(row.getInclusionDecisionDate(),
+                            "Поле 'inclusionDecisionDate' пустое в строке " + index),
+                    () -> assertNotNull(row.getExclusionDecisionDate(),
+                            "Поле 'exclusionDecisionDate' пустое в строке " + index)
+            );
+        }
+    }
+
+    @Test
+    void shouldSkipNullRowAndContinueParsing() {
+        Path nullRow = Paths.get("src", "test", "resources", "tables", "skip_null_row.xlsx");
+
+        assertTrue(java.nio.file.Files.exists(nullRow),
+                "Тестовый файл skip_null_row.xlsx не найден по пути: " + nullRow.toAbsolutePath());
+
+        List<ResourceRowDto> result = xlsxParseService.parse(nullRow);
+
+        assertNotNull(result, "Результат парсинга не должен быть null");
+        assertFalse(result.isEmpty(), "Результат не должен быть пустым, так как после пустой строки есть валидные данные");
+
+        ResourceRowDto dto = result.get(0);
+        assertNotNull(dto.getNumber(), "Порядковый номер успешно прочитанной строки должен быть заполнен");
+        assertTrue(dto.getNumber() > 0, "Порядковый номер должен быть корректным числом больше нуля");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFileIsEmpty() {
+        Path emptyFile = Paths.get("src", "test", "resources", "tables", "file_is_empty.xlsx");
+        List<ResourceRowDto> result = xlsxParseService.parse(emptyFile);
+
+        assertNotNull(result, "Сервис не должен возвращать null вместо списка");
+        assertTrue(result.isEmpty(), "Список должен быть пустым для файла без строк");
+    }
+
+    @Test
+    void shouldReturnNullWhenCellDoesNotExist() {
+        Path missingCell = Paths.get("src", "test", "resources", "tables", "missing_cell.xlsx");
+        assertTrue(Files.exists(missingCell), "Тестовый файл missing_cells.xlsx не найден по пути: "
+                    + missingCell.toAbsolutePath());
+        List<ResourceRowDto> result = xlsxParseService.parse(missingCell);
+
+        assertNotNull(result, "Результат парсинга не должен быть null");
+        assertEquals(5, result.size(),"Номер строки должен быть корректно прочитан");
+
+        ResourceRowDto dto = result.get(0);
+        assertEquals(5, dto.getNumber(),"Номер строки должен быть корректно прочитан");
+
+        assertNull(dto.getFullName(), "Поле fullName должно быть null для отсутствующей ячейки");
+        assertNull(dto.getInclusionGrounds(), "Поле inclusionGrounds должно быть null для отсутствующей ячейки");
+        assertNull(dto.getInclusionDecisionDate(), "Поле даты включения должно быть null для отсутствующей ячейки");
+        assertNull(dto.getExclusionDecisionDate(), "Поле даты исключения должно быть null для отсутствующей ячейки");
+    }
+
+    @Test
+    void shouldReturnNullDateWhenCellValueStartsWithDatePrefix() {
+        Path datePrefix = Paths.get("src", "test", "resources", "tables", "cell_value_starts_with_date_prefix.xlsx");
+
+        assertTrue(Files.exists(datePrefix), "Тестовый файл cell_value_starts_with_date_prefix.xlsx не найден по пути: "
+                    + datePrefix.toAbsolutePath());
+
+        List<ResourceRowDto> result = xlsxParseService.parse(datePrefix);
+
+        assertNotNull(result, "Результат парсинга не должен быть null");
+        assertFalse(result.isEmpty(), "Строка должна быть успешно распарсена");
+
+        ResourceRowDto dto = result.get(0);
+
+        assertNull(dto.getInclusionDecisionDate(), "Если текст в ячейке начинается с 'Дата '," +
+                " метод parseDateSafe должен вернуть null");
+    }
+//    перейти к следующему условию в парсинге дат — отсечению времени по первому пробелу (if (spaceIndex > 0))
+    @Test
+    void shouldTruncateTimeAndParseDateCorrectlyFormResource() {
+        Path truncateTime = Paths.get("src", "test", "resources", "tables", "truncate_time.xlsx");
+
+        List<ResourceRowDto> result = xlsxParseService.parse(truncateTime);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
+        assertEquals(5, result.size(), "Должна успешно распарситься одна строка");
 
-        ResourceRowDto firstDto = result.get(0);
-        assertEquals(1, firstDto.getNumber());
-        assertEquals("«Евразийская антимонопольная ассоциация»", firstDto.getFullName());
-        assertEquals("Статья 32 ФЗ", firstDto.getInclusionGrounds());
-        assertEquals(LocalDate.of(2013, 6, 27), firstDto.getInclusionDecisionDate());
-        assertEquals(LocalDate.of(2023, 7, 5), firstDto.getExclusionDecisionDate());
+        ResourceRowDto dto = result.get(0);
 
-        ResourceRowDto secondDto = result.get(1);
-        assertEquals(2, secondDto.getNumber());
-        assertEquals("Ассоциация ГОЛОС", secondDto.getFullName());
-        assertNull(secondDto.getExclusionDecisionDate());
+        assertEquals(LocalDate.of(2014, 06, 05), dto.getInclusionDecisionDate(),
+                "Дата включения должна быть распарсена без времени");
+        assertEquals(LocalDate.of(2017, 02, 20), dto.getExclusionDecisionDate(),
+                "Дата исключения должна быть распарсена без времени");
     }
 
     @Test
-    void  parse_RowWithTextInIndexCell_IsSkipped(@TempDir Path tempDir) throws IOException {
-        Path filePath = tempDir.resolve("invalid_row.xlsx");
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Sheet1");
+    void shouldThrowRuntimeExceptionWhenFileDoesNotExist() {
+        Path doesNotExist = Paths.get("src", "test", "resources", "tables", "does_not_exist.xlsx");
 
-            Row headerRow = sheet.createRow(1);
-            headerRow.createCell(0).setCellValue("Это заголовок, тут нет числа");
-            headerRow.createCell(1).setCellValue("Тестовое имя");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> xlsxParseService.parse(doesNotExist));
 
-            Row dataRow = sheet.createRow(2);
-            dataRow.createCell(0).setCellValue(1);
-            dataRow.createCell(1).setCellValue("Корректное имя");
-
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                workbook.write(fos);
-            }
-        }
-
-        List<ResourceRowDto> result = xlsxParseService.parse(filePath);
-
-        assertEquals(1, result.size());
-        assertEquals("Корректное имя", result.get(0).getFullName());
-    }
-
-    @Test
-    void parse_CorruptedOrEmptyFile_ThrowsRuntimeException(@TempDir Path tempDir) throws IOException {
-        Path filePath = tempDir.resolve("empty.xlsx");
-        try (Workbook workbook = new XSSFWorkbook()) {
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                workbook.write(fos);
-            }
-        }
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> xlsxParseService.parse(filePath));
-
-        assertTrue(exception.getMessage().contains("Не удалось прочитать XLSX файл"));
-    }
-
-    @Test
-    void parse_RowWithOnlyIndexAndNoData_IsSkipped(@TempDir Path tempDir) throws IOException {
-        Path filePath = tempDir.resolve("blank_row.xlsx");
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Sheet1");
-
-            Row dataRow = sheet.createRow(2);
-            dataRow.createCell(0).setCellValue(999);
-            dataRow.createCell(1).setCellValue("");
-            dataRow.createCell(2).setCellValue("   "); // пробелы
-
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                workbook.write(fos);
-            }
-        }
-
-        List<ResourceRowDto> result = xlsxParseService.parse(filePath);
-
-        assertTrue(result.isEmpty() || result.get(0).getFullName() == null);
+        assertTrue(exception.getMessage().contains("Не удалось прочитать XLSX файл:"),
+                "Сообщение об ошибке должно быть информативным");
+        assertTrue(exception.getMessage().contains(doesNotExist.toString()),
+                "Сообщение должно содержать путь к файлу");
     }
 }

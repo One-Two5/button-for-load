@@ -123,7 +123,7 @@ public class XlsxParseService {
 
         String cellValue = value.trim();
 
-        if (cellValue.startsWith("Дата ")) {
+        if (cellValue.startsWith("Дата")) {
             return null;
         }
 
