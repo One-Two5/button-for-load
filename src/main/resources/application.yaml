@@ -1,10 +1,20 @@
 spring:
+  port: ${SPRING_PORT}
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/button_db
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_NAME}
+    password: ${DB_PASS}
+    driver-class-name: ${DB_DRIVER}
 
   liquibase:
     enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/changelog-master.yaml
+
+app:
+    files:
+      storage-dir: files/bucket
+
+    external-service:
+      url: ${APP_EXTERNAL_SERVICE}
+

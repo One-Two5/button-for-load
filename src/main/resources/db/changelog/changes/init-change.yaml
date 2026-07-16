@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 05072026-create-resource-row-table
+      author: ek
+      changes:
+        - createTable:
+            tableName: resource_row
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: number
+                  type: INT
+              - column:
+                  name: full_name
+                  type: TEXT
+              - column:
+                  name: inclusion_grounds
+                  type: TEXT
+              - column:
+                  name: inclusion_decision_date
+                  type: DATE
+              - column:
+                  name: exclusion_decision_date
+                  type: DATE

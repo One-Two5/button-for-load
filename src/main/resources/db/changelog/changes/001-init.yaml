@@ -1,7 +1,0 @@
-databaseChangeLog:
-- changeSet:
-    id: 001
-    author: dev
-    changes:
-      - sql:
-          sql: SELECT 1;
