@@ -14,6 +14,8 @@ spring:
 app:
     files:
       storage-dir: files/bucket
+      archive-dir: files/archive
+      error-dir: files/errors
 
     external-service:
       url: ${APP_EXTERNAL_SERVICE}
