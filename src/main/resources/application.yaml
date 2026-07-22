@@ -20,3 +20,5 @@ app:
     external-service:
       url: ${APP_EXTERNAL_SERVICE}
 
+    scheduler:
+      scan-cron: "0 * * * * *"
