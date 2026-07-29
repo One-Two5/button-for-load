@@ -1,6 +1,12 @@
 spring:
   port: ${SPRING_PORT}
 
+  task:
+    scheduling:
+      pool:
+        size: 5
+      thread-name-prefix: "import-task-"
+
   datasource:
     url: ${DB_URL}
     username: ${DB_NAME}
@@ -20,3 +26,5 @@ app:
     external-service:
       url: ${APP_EXTERNAL_SERVICE}
 
+    scheduler:
+      scan-cron: "0 * * * * *"
