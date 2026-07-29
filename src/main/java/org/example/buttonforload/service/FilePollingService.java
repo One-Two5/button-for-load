@@ -8,6 +8,7 @@ import org.example.buttonforload.util.FileComparatorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ScanDirectoryService {
+public class FilePollingService {
 
     @Value("${app.files.storage-dir}")
     private String storageDir;
@@ -31,11 +32,12 @@ public class ScanDirectoryService {
     @Value("${app.files.error-dir}")
     private String errorDir;
 
-    private static final Logger log = LoggerFactory.getLogger(ScanDirectoryService.class);
+    private static final Logger log = LoggerFactory.getLogger(FilePollingService.class);
 
     private final XlsxParseService xlsxParseService;
     private final ResourceRowRepository resourceRowRepository;
 
+    @Async
     public void scanDirectory() {
         Path scanDirectoryPath = Paths.get(storageDir);
 
