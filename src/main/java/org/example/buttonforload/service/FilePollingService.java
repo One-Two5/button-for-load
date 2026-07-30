@@ -8,7 +8,6 @@ import org.example.buttonforload.util.FileComparatorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -37,7 +36,6 @@ public class FilePollingService {
     private final XlsxParseService xlsxParseService;
     private final ResourceRowRepository resourceRowRepository;
 
-    @Async
     public void scanDirectory() {
         Path scanDirectoryPath = Paths.get(storageDir);
 

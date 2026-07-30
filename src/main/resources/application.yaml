@@ -2,7 +2,7 @@ spring:
   port: ${SPRING_PORT}
 
   task:
-    scheduling:
+    execution:
       pool:
         size: 5
       thread-name-prefix: "import-task-"
