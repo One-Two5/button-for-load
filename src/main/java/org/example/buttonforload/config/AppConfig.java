@@ -2,7 +2,9 @@ package org.example.buttonforload.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -11,6 +13,7 @@ import javax.net.ssl.X509TrustManager;
 import java.net.http.HttpClient;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 public class AppConfig {
@@ -38,5 +41,21 @@ public class AppConfig {
         var requestFactory = new JdkClientHttpRequestFactory(httpClient);
 
         return new RestTemplate(requestFactory);
+    }
+
+    @Bean
+    public AsyncTaskExecutor applicationTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(20);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("import-task-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+
+        executor.initialize();
+        return executor;
     }
 }
