@@ -1,12 +1,6 @@
 spring:
   port: ${SPRING_PORT}
 
-  task:
-    execution:
-      pool:
-        size: 5
-      thread-name-prefix: "import-task-"
-
   datasource:
     url: ${DB_URL}
     username: ${DB_NAME}

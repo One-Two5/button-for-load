@@ -3,6 +3,7 @@ package org.example.buttonforload.service;
 import lombok.RequiredArgsConstructor;
 import org.example.buttonforload.dto.ResourceRowDto;
 import org.example.buttonforload.repository.ResourceRowRepository;
+import org.example.buttonforload.scheduler.TaskExecutor;
 import org.example.buttonforload.util.ArchiveFileUtil;
 import org.example.buttonforload.util.FileComparatorUtil;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class FilePollingService {
+public class FilePollingService implements TaskExecutor {
 
     @Value("${app.files.storage-dir}")
     private String storageDir;
@@ -36,7 +37,7 @@ public class FilePollingService {
     private final XlsxParseService xlsxParseService;
     private final ResourceRowRepository resourceRowRepository;
 
-    public void scanDirectory() {
+    public void executeTask() {
         Path scanDirectoryPath = Paths.get(storageDir);
 
         if (!Files.exists(scanDirectoryPath)) {
