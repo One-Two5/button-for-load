@@ -1,6 +1,6 @@
 package org.example.buttonforload.repository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.buttonforload.dto.ResourceRowDto;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,7 +11,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ResourceRowRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -43,7 +43,6 @@ public class ResourceRowRepository {
                         .addValue("exclusionDecisionDate",
                                 row.getExclusionDecisionDate() != null ? Date.valueOf(row.getExclusionDecisionDate()) : null))
                 .toArray(MapSqlParameterSource[]::new);
-
         return jdbcTemplate.batchUpdate(sql, batch);
     }
 }
